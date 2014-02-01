@@ -1,0 +1,14 @@
+{
+  "name": "threex.toxicpproc",
+  "homepage": "https://github.com/jeromeetienne/threex.toxicpproc",
+  "_release": "e6f6e3dc90",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "e6f6e3dc90501d297f23f311b80e02341e2fb2d2"
+  },
+  "_source": "git://github.com/jeromeetienne/threex.toxicpproc.git",
+  "_target": "*",
+  "_originalSource": "threex.toxicpproc",
+  "_direct": true
+}
