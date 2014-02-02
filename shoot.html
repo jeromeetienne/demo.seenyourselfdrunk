@@ -87,27 +87,6 @@ console.log('presetLabel', presetLabel)
 })
 </script>
 <style>
-#screenshotShare {
-	position: absolute;
-	bottom: 10px;
-	right: 10px;
-	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
-}
-#screenshotShare i {
-	margin: 10px
-}
-#screenshotShare .fa:hover {
-	pointer: 'hand';
-	color: white;
-}
-</style>
-<div id='screenshotShare'>
-	<i id='screenshotTwitter' class="fa fa-twitter fa-4x"></i>
-	<i id='screenshotGooglePlus' class="fa fa-google-plus fa-4x"></i>
-	<i id='screenshotFacebook'class="fa fa-facebook-square fa-4x"></i>
-</div>
-
-<style>
 .flashDiv {
 	position: fixed;
     	top	: 0;
@@ -238,42 +217,7 @@ window.photoboothClick	= photoboothClick
 			})
 		})
 	})
-	
-	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
-		photoboothClick(function(){
-			uploadScreenshot(renderer, function(pageUrl){
-				var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
-					url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
-					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl,
-					url	: pageUrl,
-					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time!'
-				})
-				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
-			})
-			
-		})
-	})
-	document.querySelector('#screenshotGooglePlus').addEventListener('click', function(){
-		photoboothClick(function(){
-			uploadScreenshot(renderer, function(pageUrl){
-				var url	= 'https://plus.google.com/share?'+jQuery.param({
-					url	: pageUrl,
-				})
-				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
-			})
-		})
-	})
-	document.querySelector('#screenshotFacebook').addEventListener('click', function(){
-		photoboothClick(function(){
-			uploadScreenshot(renderer, function(pageUrl){
-				var url	= 'https://www.facebook.com/sharer/sharer.php?'+jQuery.param({
-					u	: pageUrl,
-				})
-				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
-			})
-		})
-	})
-	
+
 function uploadScreenshot(renderer, onSuccess){
 	// From http://29a.ch/2011/9/11/uploading-from-html5-canvas-to-imgur-data-uri
 	// able to upload your screenshot without running servers
