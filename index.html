@@ -12,10 +12,31 @@
 <!-- include for threex.glowdatgui -->
 <script src='vendor/three.js/examples/js/libs/dat.gui.min.js'></script>
 
+<script src="vendor/threex.screenshot.js"></script>
+<script src="vendor/jquery.min.js"></script>
+
 <script src="vendor/require.js/require.js"></script>
 <script src="vendor/three.js/examples/js/Detector.js"></script>
 <script src="vendor/threex.windowresize.js"></script>
-<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'><script>
+<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+
+<style>
+#tweetme {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+}
+#tweetme:hover {
+	pointer: 'hand';
+	color: white;
+}
+</style>
+<div id='tweetme'>
+	<i class="fa fa-camera fa-4x"></i>
+</div>
+<script>
 require([ 'bower_components/threex.toxicpproc/package.require.js'
 	, 'bower_components/threex.videotexture/threex.webcamtexture.js'
 	, 'bower_components/threex.videotexture/threex.videotexture.js'
@@ -26,7 +47,9 @@ require([ 'bower_components/threex.toxicpproc/package.require.js'
 		throw 'WebGL Not Available'
 	} 
 	// setup webgl renderer full page
-	var renderer	= new THREE.WebGLRenderer();
+	var renderer	= new THREE.WebGLRenderer({
+		preserveDrawingBuffer	: true
+	});
 	renderer.setSize( window.innerWidth, window.innerHeight );
 	document.body.appendChild( renderer.domElement );
 	// setup a scene and camera
@@ -47,19 +70,66 @@ require([ 'bower_components/threex.toxicpproc/package.require.js'
 	//////////////////////////////////////////////////////////////////////////////////
 	
 	// create the webcamTexture
-	var videoTexture	= new THREEx.WebcamTexture()
+	// var videoTexture	= new THREEx.WebcamTexture()
+	// onRenderFcts.push(function(delta, now){
+	// 	videoTexture.update(delta, now)
+	// })
+	
+	
+	// create the videoTexture
+	var videoUrl	= 'bower_components/threex.toxicpproc/examples/videos/sintel.ogv';
+	var videoTexture= new THREEx.VideoTexture(videoUrl)
+	videoTexture.video.volume	= 0
 	onRenderFcts.push(function(delta, now){
 		videoTexture.update(delta, now)
 	})
 	
+	document.querySelector('#tweetme').addEventListener('click', function(){
+		
+		uploadScreenshot(renderer, function(pageUrl){
+			var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
+				url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+				text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl
+			})
+			window.open(url)
+		})
+	})
 	
-	// create the videoTexture
-	// var videoUrl	= 'bower_components/threex.toxicpproc/examples/videos/sintel.ogv';
-	// var videoTexture= new THREEx.VideoTexture(videoUrl)
-	// videoTexture.video.volume	= 0
-	// onRenderFcts.push(function(delta, now){
-	// 	videoTexture.update(delta, now)
-	// })
+function uploadScreenshot(renderer, onSuccess){
+	// From http://29a.ch/2011/9/11/uploading-from-html5-canvas-to-imgur-data-uri
+	// able to upload your screenshot without running servers
+
+	var canvas	= renderer.domElement;
+	try {
+		var url = canvas.toDataURL('image/jpeg', 0.7);
+	} catch(e) {
+		var url = canvas.toDataURL();
+	}
+
+	// upload to imgur using jquery/CORS
+	// https://developer.mozilla.org/En/HTTP_access_control
+	jQuery.ajax({
+		url	: 'http://api.imgur.com/2/upload.json',
+		type	: 'POST',
+		data	: {
+			type	: 'base64',
+			// get your key here, quick and fast http://imgur.com/register/api_anon
+			key	: 'a25f210e5e6f682fb052d63b19987a56',
+			name	: '.jpg',
+			title	: 'Have You Seen Yourself When You are Drunk ?',
+			caption	: 'Wanna Try it ? http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+			image	: url.split(',')[1]
+		},
+		dataType	: 'json'
+	}).success(function(data) {
+		console.log("result data", data)
+		var pageUrl	= data['upload']['links']['imgur_page'];
+		console.log('pageUrl', pageUrl)
+		onSuccess && onSuccess(pageUrl)
+	}).error(function() {
+		alert('Could not reach api.imgur.com. Sorry :(');
+	});
+}
 	
 	//////////////////////////////////////////////////////////////////////////////////
 	//		Create the screen THREE.Plane to receive video texture		//
@@ -94,10 +164,6 @@ require([ 'bower_components/threex.toxicpproc/package.require.js'
 	toxicPasses.addPassesTo(composer)
 
 	composer.passes[composer.passes.length -1 ].renderToScreen	= true;
-	
-	//////////////////////////////////////////////////////////////////////////////////
-	//		switch color cube randomly every 2 seconds			//
-	//////////////////////////////////////////////////////////////////////////////////
 	
 
 	//////////////////////////////////////////////////////////////////////////////////
