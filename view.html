@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<link rel="canonical" href="http://jeromeetienne.github.io/demo.seenyourselfdrunk/"/>
+<title>Have You Seen Yourself When You are Drunk ?</title>
+
+<script src="vendor/jquery.min.js"></script>
+
+<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+<style>
+.osd {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+	position: absolute;
+	top	: 10px;
+	left	: 10px;	
+}
+.osd a {
+	color	: black;
+}
+.osd a:hover {
+	pointer	: 'hand';
+	color	: white;
+}
+.osd i.fa-4x {
+	margin-left: 25px
+}
+</style>
+<div class='osd'>
+	<a href='/' title='HomePage'><i class="fa fa-home fa-4x"></i></a>
+	<a href='shoot.html' title='Take A Picture'><i class="fa fa-camera fa-4x"></i></a>
+	<i id='screenshotTwitter' class="fa fa-twitter fa-4x"></i>
+	<i id='screenshotGooglePlus' class="fa fa-google-plus fa-4x"></i>
+	<i id='screenshotFacebook'class="fa fa-facebook-square fa-4x"></i>
+</div>
+<script>
+	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
+					url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl,
+					url	: pageUrl,
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time!'
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+			
+		})
+	})
+	document.querySelector('#screenshotGooglePlus').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://plus.google.com/share?'+jQuery.param({
+					url	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+		})
+	})
+	document.querySelector('#screenshotFacebook').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://www.facebook.com/sharer/sharer.php?'+jQuery.param({
+					u	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+		})
+	})
+	
+function uploadScreenshot(renderer, onSuccess){
+	// From http://29a.ch/2011/9/11/uploading-from-html5-canvas-to-imgur-data-uri
+	// able to upload your screenshot without running servers
+
+	var canvas	= renderer.domElement;
+	try {
+		var url = canvas.toDataURL('image/jpeg', 0.7);
+	} catch(e) { 
+		var url = canvas.toDataURL();
+	}
+
+	// upload to imgur using jquery/CORS
+	// https://developer.mozilla.org/En/HTTP_access_control
+	jQuery.ajax({
+		url	: 'http://api.imgur.com/2/upload.json',
+		type	: 'POST',
+		data	: {
+			type	: 'base64',
+			// get your key here, quick and fast http://imgur.com/register/api_anon
+			key	: 'a25f210e5e6f682fb052d63b19987a56',
+			name	: '.jpg',
+			title	: 'Have You Seen Yourself When You are Drunk ?',
+			caption	: 'Wanna Try ? http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+			image	: url.split(',')[1]
+		},
+		dataType	: 'json'
+	}).success(function(data) {
+		console.log("result data", data)
+		var pageUrl	= data['upload']['links']['imgur_page'];
+		console.log('pageUrl', pageUrl)
+		onSuccess && onSuccess(pageUrl)
+	}).error(function() {
+		alert('Could not reach api.imgur.com. Sorry :(');
+	});
+}
+	
+</script>
+
+<!-- ************************************************************ -->
+<!-- Share Part -->
+
+<!-- github ribbon -->
+<a href="https://github.com/jeromeetienne/demo.seenyourselfdrunk" target='_blank'><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+
+<div style='position: fixed; bottom: 10px; left: 10px;'>	
+	<!-- ******************* google plus ************************* -->
+	<!-- Place this tag where you want the +1 button to render. -->
+	<div class="g-plusone" data-size="medium"></div>
+
+	<!-- Place this tag after the last +1 button tag. -->
+	<script type="text/javascript">
+	  (function() {
+	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+	    po.src = 'https://apis.google.com/js/plusone.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+	  })();
+	</script>
+
+	<!-- twitter -->
+	<a href="https://twitter.com/share" class="twitter-share-button" data-via="jerome_etienne" data-text='Come Play Stellar7! A free 3d tank game where you kill other tanks. So Fun!'>Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+	<br/>	
+</div>
+
+</body>

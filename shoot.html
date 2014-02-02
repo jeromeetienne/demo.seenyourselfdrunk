@@ -65,7 +65,7 @@
 </style>
 <div class='osd'>
 	<a href='/' title='HomePage'><i class="fa fa-home fa-4x"></i></a>
-	<a href='/' title='Take A Picture' id='screenshot'><i class="fa fa-camera fa-4x"></i></a>
+	<a href='javascript:void(0)' title='Take A Picture' id='screenshot'><i class="fa fa-camera fa-4x"></i></a>
 	<br/>
 	<a href='javascript:void(0)' class='intensityRadio'>Sober <i class="fa fa-check"></i></a>
 	<br/>
@@ -234,10 +234,10 @@ window.photoboothClick	= photoboothClick
 		photoboothClick(function(){
 			renderLoopFrozen	= true;
 			uploadScreenshot(renderer, function(pageUrl){
-				
+				location.href	= 'view.html?pageUrl='+encodeURIComponent(pageUrl)
 			})
 		})
-	}
+	})
 	
 	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
 		photoboothClick(function(){
