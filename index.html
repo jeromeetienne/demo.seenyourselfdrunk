@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<title>Have You Seen Yourself When You are Drunk ?</title>
 <script src='vendor/three.js/build/three.js'></script>
 <script src="vendor/three.js/examples/js/postprocessing/EffectComposer.js"></script>
 <script src="vendor/three.js/examples/js/postprocessing/MaskPass.js"></script>
@@ -20,22 +21,59 @@
 <script src="vendor/threex.windowresize.js"></script>
 <body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
 <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
 <style>
-#tweetme {
+#screenshotShare {
 	position: absolute;
 	bottom: 10px;
 	right: 10px;
 	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+	
 }
-#tweetme:hover {
+#screenshotShare i {
+	margin: 10px
+}
+#screenshotShare .fa:hover {
 	pointer: 'hand';
 	color: white;
 }
 </style>
-<div id='tweetme'>
-	<i class="fa fa-camera fa-4x"></i>
+<div id='screenshotShare'>
+	<i id='screenshotTwitter' class="fa fa-twitter fa-4x"></i>
+	<i id='screenshotGooglePlus' class="fa fa-google-plus fa-4x"></i>
+	<i id='screenshotFacebook'class="fa fa-facebook-square fa-4x"></i>
 </div>
+
+<style>
+.flashDiv {
+	position: fixed;
+    	top	: 0;
+    	left	: 0;
+	width	: 100%;
+	height	: 100%;
+	background-color	: #fff;
+} 
+</style>
+<div class='flashDiv' style='display:none;'></div>
+
+<style>
+.counter {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bolder;
+	position: fixed;
+    	top	: 30%;
+    	left	: 0;
+	width	: 100%;
+	height	: 100%;
+	
+	color: white;
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+
+	text-align: center;
+	font-size: 1000%;
+}
+</style>
+<div class='counter' style='display:none;'>2</div>
+
 <script>
 require([ 'bower_components/threex.toxicpproc/package.require.js'
 	, 'bower_components/threex.videotexture/threex.webcamtexture.js'
@@ -68,30 +106,99 @@ require([ 'bower_components/threex.toxicpproc/package.require.js'
 	//////////////////////////////////////////////////////////////////////////////////
 	//		comment								//
 	//////////////////////////////////////////////////////////////////////////////////
-	
-	// create the webcamTexture
-	// var videoTexture	= new THREEx.WebcamTexture()
-	// onRenderFcts.push(function(delta, now){
-	// 	videoTexture.update(delta, now)
-	// })
-	
-	
-	// create the videoTexture
-	var videoUrl	= 'bower_components/threex.toxicpproc/examples/videos/sintel.ogv';
-	var videoTexture= new THREEx.VideoTexture(videoUrl)
-	videoTexture.video.volume	= 0
-	onRenderFcts.push(function(delta, now){
-		videoTexture.update(delta, now)
-	})
-	
-	document.querySelector('#tweetme').addEventListener('click', function(){
-		
-		uploadScreenshot(renderer, function(pageUrl){
-			var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
-				url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
-				text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl
+	function doCameraSound(){
+		var cameraSound	= new Audio("sounds/51360__thecheeseman__camera-snap1.wav");
+		cameraSound.volume	= 0.3
+		cameraSound.play()		
+	}
+	function doCounterSound(){
+		var cameraSound	= new Audio("sounds/139061__joedeshon__push-button-switch-07.wav");
+		cameraSound.volume	= 0.8
+		cameraSound.play()		
+	}
+	function doFlashEffect(){
+		jQuery('.flashDiv')
+			.show()  //show the hidden div
+			.animate({
+				opacity: 0.5
+			}, 200) 
+			.fadeOut(400)
+			.css({
+				opacity	: 1
 			})
-			window.open(url)
+	}
+	function photoboothClick(callback){
+		jQuery('.counter').show()
+		jQuery('.counter').text(3)
+		doCounterSound()
+		setTimeout(function(){
+			jQuery('.counter').text(2)			
+			doCounterSound()
+			setTimeout(function(){
+				jQuery('.counter').text(1)			
+				doCounterSound()
+				setTimeout(function(){
+					jQuery('.counter').hide()
+					doCameraSound()
+					doFlashEffect()
+					callback && callback()
+				}, 1000*1)
+			}, 1000*1)
+		}, 1000*1)
+	}
+window.photoboothClick	= photoboothClick
+	
+	var onWebcam	= false
+	if( onWebcam ){
+		// create the webcamTexture
+		var videoTexture	= new THREEx.WebcamTexture()
+		onRenderFcts.push(function(delta, now){
+			videoTexture.update(delta, now)
+		})		
+	}else{
+		// create the videoTexture
+		var videoUrl	= 'bower_components/threex.toxicpproc/examples/videos/sintel.ogv';
+		var videoTexture= new THREEx.VideoTexture(videoUrl)
+		videoTexture.video.volume	= 0
+		onRenderFcts.push(function(delta, now){
+			videoTexture.update(delta, now)
+		})		
+	}
+	
+	
+	
+	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
+					url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl,
+					url	: pageUrl,
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time!'
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+			
+		})
+	})
+	document.querySelector('#screenshotGooglePlus').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://plus.google.com/share?'+jQuery.param({
+					url	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+		})
+	})
+	document.querySelector('#screenshotFacebook').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://www.facebook.com/sharer/sharer.php?'+jQuery.param({
+					u	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
 		})
 	})
 	
@@ -102,7 +209,7 @@ function uploadScreenshot(renderer, onSuccess){
 	var canvas	= renderer.domElement;
 	try {
 		var url = canvas.toDataURL('image/jpeg', 0.7);
-	} catch(e) {
+	} catch(e) { 
 		var url = canvas.toDataURL();
 	}
 
@@ -117,7 +224,7 @@ function uploadScreenshot(renderer, onSuccess){
 			key	: 'a25f210e5e6f682fb052d63b19987a56',
 			name	: '.jpg',
 			title	: 'Have You Seen Yourself When You are Drunk ?',
-			caption	: 'Wanna Try it ? http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+			caption	: 'Wanna Try ? http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
 			image	: url.split(',')[1]
 		},
 		dataType	: 'json'

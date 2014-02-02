@@ -1,7 +1,9 @@
 # makefile to automatize simple operations
 
+# lighttpd is needed because python doesnt handle range request and this is needed for sounds
 server:
-	python -m SimpleHTTPServer
+	#python -m SimpleHTTPServer
+	lighttpd -D -f lighttpd.conf
 
 deploy:
 	# assume there is something to commit
