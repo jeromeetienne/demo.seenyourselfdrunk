@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<link rel="canonical" href="http://jeromeetienne.github.io/demo.seenyourselfdrunk/"/>
 <title>Have You Seen Yourself When You are Drunk ?</title>
 <script src='vendor/three.js/build/three.js'></script>
 <script src="vendor/three.js/examples/js/postprocessing/EffectComposer.js"></script>
@@ -22,12 +23,75 @@
 <body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
 <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 <style>
+.osd {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+	position: absolute;
+	top	: 10px;
+	left	: 10px;	
+}
+.osd a {
+	color	: black;
+}
+.osd a:hover {
+	pointer	: 'hand';
+	color	: white;
+}
+.osd i.fa-4x {
+	margin-left: 25px
+}
+
+.intensityRadio {
+	font-size: 200%;
+	text-decoration: none;
+	text-align: center;
+	padding-left: 10px;
+	padding-right: 5px;
+}
+.intensityRadio .fa {
+	display: none;
+	
+}
+.intensityRadio.active .fa {
+	color: green;
+	display: inline;
+}
+.intensityRadio:hover {
+	pointer	: 'hand';
+	color: white;
+}
+</style>
+<div class='osd'>
+	<a href='/' title='HomePage'><i class="fa fa-home fa-4x"></i></a>
+	<a href='/' title='Take A Picture' id='screenshot'><i class="fa fa-camera fa-4x"></i></a>
+	<br/>
+	<a href='javascript:void(0)' class='intensityRadio'>Sober <i class="fa fa-check"></i></a>
+	<br/>
+	<a href='javascript:void(0)' class='intensityRadio'>Drunk <i class="fa fa-check"></i></a>
+	<br/>
+	<a href='javascript:void(0)' class='intensityRadio'>High <i class="fa fa-check"></i></a>
+	<br/>
+	<a href='javascript:void(0)' class='intensityRadio active'>Wasted <i class="fa fa-check"></i></a>
+</div>
+<script>
+jQuery('.intensityRadio').click(function(){
+	jQuery('.intensityRadio').removeClass('active')
+	jQuery(this).addClass('active')
+
+	var presetLabel	= jQuery(this).text().toLowerCase().trim();
+console.log('presetLabel', presetLabel)
+	toxicPasses.setPreset(presetLabel)
+	
+})
+</script>
+<style>
 #screenshotShare {
 	position: absolute;
 	bottom: 10px;
 	right: 10px;
 	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
-	
 }
 #screenshotShare i {
 	margin: 10px
@@ -166,7 +230,14 @@ window.photoboothClick	= photoboothClick
 		})		
 	}
 	
-	
+	document.querySelector('#screenshot').addEventListener('click', function(){
+		photoboothClick(function(){
+			renderLoopFrozen	= true;
+			uploadScreenshot(renderer, function(pageUrl){
+				
+			})
+		})
+	}
 	
 	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
 		photoboothClick(function(){
@@ -258,7 +329,10 @@ function uploadScreenshot(renderer, onSuccess){
 	onRenderFcts.push(function(delta, now){
 		toxicPasses.update(delta, now)
 	})
-	THREEx.addToxicPasses2DatGui(toxicPasses)
+
+	var datGui	= new dat.GUI()
+	THREEx.addToxicPasses2DatGui(toxicPasses, datGui)
+	datGui.close()
 
 	//////////////////////////////////////////////////////////////////////////////////
 	//		EffectComposer							//
@@ -273,7 +347,7 @@ function uploadScreenshot(renderer, onSuccess){
 
 	composer.passes[composer.passes.length -1 ].renderToScreen	= true;
 	
-
+	window.toxicPasses	= toxicPasses
 	//////////////////////////////////////////////////////////////////////////////////
 	//		render the scene						//
 	//////////////////////////////////////////////////////////////////////////////////
@@ -289,9 +363,11 @@ function uploadScreenshot(renderer, onSuccess){
 	//		Rendering Loop runner						//
 	//////////////////////////////////////////////////////////////////////////////////
 	var lastTimeMsec= null
+	var renderLoopFrozen	= false
 	requestAnimationFrame(function animate(nowMsec){
 		// keep looping
 		requestAnimationFrame( animate );
+		if( renderLoopFrozen === true )	return
 		// measure time
 		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
 		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
@@ -304,7 +380,31 @@ function uploadScreenshot(renderer, onSuccess){
 })
 </script>
 
+<!-- ************************************************************ -->
+<!-- Share Part -->
+
 <!-- github ribbon -->
-<a href="https://github.com/jeromeetienne/demo.seenyourselfdrunk" target='_blank'><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+<a href="https://github.com/jeromeetienne/demo.seenyourselfdrunk" target='_blank'><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+
+<div style='position: fixed; bottom: 10px; left: 10px;'>	
+	<!-- ******************* google plus ************************* -->
+	<!-- Place this tag where you want the +1 button to render. -->
+	<div class="g-plusone" data-size="medium"></div>
+
+	<!-- Place this tag after the last +1 button tag. -->
+	<script type="text/javascript">
+	  (function() {
+	    var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+	    po.src = 'https://apis.google.com/js/plusone.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+	  })();
+	</script>
+
+	<!-- twitter -->
+	<a href="https://twitter.com/share" class="twitter-share-button" data-via="jerome_etienne" data-text='Come Play Stellar7! A free 3d tank game where you kill other tanks. So Fun!'>Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+	<br/>	
+</div>
 
 </body>

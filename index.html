@@ -4,32 +4,26 @@
 <script src="vendor/jquery.min.js"></script>
 <script src="vendor/Tween.js"></script>
 <body style='margin: 0px; background-color: black;'>
+
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 <style>
 .osd {
-	position: fixed; 
-	bottom: 0; 
-	right: 0;
-
-	font-family: Arial, Helvetica, sans-serif;
-	font-weight: bolder;
-	text-decoration: none;
-	font-size: 200%;
-	
-	color: white;
-	
-	background-color: cyan;
-	
-	opacity: 0.5;
-	
-	padding: 0.2em;
-	/*border-radius: 10px;*/
-	border-top-left-radius: 10px;
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+	position: absolute;
+	top: 10px;
+	left: 10px;	
 }
-.osd:hover {
-	opacity: 1.0;
+.osd a {
+	color: black;
+}
+.osd a:hover {
+	pointer: 'hand';
+	color: white;
 }
 </style>
-<a href='shoot.html' class='osd'>Show Me Now!</a>
+<div id='' class='osd'>
+	<a href='/shoot.html' title='Show Me Now!'><i class="fa fa-camera fa-4x"></i></a>
+</div>
 
 <style>
 .scroll button {
@@ -40,7 +34,7 @@
 	font-family: Arial, Helvetica, sans-serif;
 	font-weight: bolder;
 
-	color: white;
+	color: black;
 	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
 
 	text-align: center;
@@ -89,7 +83,7 @@ jQuery(function(){
 	}, 25*1000)
 	.easing( TWEEN.Easing.Linear.None )
 	.onUpdate( function () {
-		console.log('update', this.y)
+		// console.log('update', this.y)
 		element.style.marginTop = this.y + 'px';
 	})
 	.start();
