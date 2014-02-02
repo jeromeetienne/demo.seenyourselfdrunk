@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<title>Have You Seen Yourself When You are Drunk ?</title>
+<script src='vendor/three.js/build/three.js'></script>
+<script src="vendor/three.js/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="vendor/three.js/examples/js/postprocessing/MaskPass.js"></script>
+<script src="vendor/three.js/examples/js/postprocessing/RenderPass.js"></script>
+<script src="vendor/three.js/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="vendor/three.js/examples/js/shaders/CopyShader.js"></script>
+
+<!-- for blur pass -->
+<script src="vendor/three.js/examples/js/shaders/HorizontalBlurShader.js"></script>
+<script src="vendor/three.js/examples/js/shaders/VerticalBlurShader.js"></script>
+<!-- include for threex.glowdatgui -->
+<script src='vendor/three.js/examples/js/libs/dat.gui.min.js'></script>
+
+<script src="vendor/threex.screenshot.js"></script>
+<script src="vendor/jquery.min.js"></script>
+
+<script src="vendor/require.js/require.js"></script>
+<script src="vendor/three.js/examples/js/Detector.js"></script>
+<script src="vendor/threex.windowresize.js"></script>
+<body style='margin: 0px; background-color: #bbbbbb; overflow: hidden;'>
+<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
+<style>
+#screenshotShare {
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+	
+}
+#screenshotShare i {
+	margin: 10px
+}
+#screenshotShare .fa:hover {
+	pointer: 'hand';
+	color: white;
+}
+</style>
+<div id='screenshotShare'>
+	<i id='screenshotTwitter' class="fa fa-twitter fa-4x"></i>
+	<i id='screenshotGooglePlus' class="fa fa-google-plus fa-4x"></i>
+	<i id='screenshotFacebook'class="fa fa-facebook-square fa-4x"></i>
+</div>
+
+<style>
+.flashDiv {
+	position: fixed;
+    	top	: 0;
+    	left	: 0;
+	width	: 100%;
+	height	: 100%;
+	background-color	: #fff;
+} 
+</style>
+<div class='flashDiv' style='display:none;'></div>
+
+<style>
+.counter {
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bolder;
+	position: fixed;
+    	top	: 30%;
+    	left	: 0;
+	width	: 100%;
+	height	: 100%;
+	
+	color: white;
+	text-shadow: 0 0 0.2em #F66, 0 0 0.2em #F22, 0 0 0.4em #F22;
+
+	text-align: center;
+	font-size: 1000%;
+}
+</style>
+<div class='counter' style='display:none;'>2</div>
+
+<script>
+require([ 'bower_components/threex.toxicpproc/package.require.js'
+	, 'bower_components/threex.videotexture/threex.webcamtexture.js'
+	, 'bower_components/threex.videotexture/threex.videotexture.js'
+	], function(){
+	// detect WebGL
+	if( !Detector.webgl ){
+		Detector.addGetWebGLMessage();
+		throw 'WebGL Not Available'
+	} 
+	// setup webgl renderer full page
+	var renderer	= new THREE.WebGLRenderer({
+		preserveDrawingBuffer	: true
+	});
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	document.body.appendChild( renderer.domElement );
+	// setup a scene and camera
+	var scene	= new THREE.Scene();
+	var camera	= new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 1000);
+	camera.position.z = 3;
+	var camera	= new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2,  window.innerHeight / 2, window.innerHeight / -2, -100, 100);
+
+	// declare the rendering loop
+	var onRenderFcts= [];
+
+	// handle window resize events
+	var winResize	= new THREEx.WindowResize(renderer, camera)
+	
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		comment								//
+	//////////////////////////////////////////////////////////////////////////////////
+	function doCameraSound(){
+		var cameraSound	= new Audio("sounds/51360__thecheeseman__camera-snap1.wav");
+		cameraSound.volume	= 0.3
+		cameraSound.play()		
+	}
+	function doCounterSound(){
+		var cameraSound	= new Audio("sounds/139061__joedeshon__push-button-switch-07.wav");
+		cameraSound.volume	= 0.8
+		cameraSound.play()		
+	}
+	function doFlashEffect(){
+		jQuery('.flashDiv')
+			.show()  //show the hidden div
+			.animate({
+				opacity: 0.5
+			}, 200) 
+			.fadeOut(400)
+			.css({
+				opacity	: 1
+			})
+	}
+	function photoboothClick(callback){
+		jQuery('.counter').show()
+		jQuery('.counter').text(3)
+		doCounterSound()
+		setTimeout(function(){
+			jQuery('.counter').text(2)			
+			doCounterSound()
+			setTimeout(function(){
+				jQuery('.counter').text(1)			
+				doCounterSound()
+				setTimeout(function(){
+					jQuery('.counter').hide()
+					doCameraSound()
+					doFlashEffect()
+					callback && callback()
+				}, 1000*1)
+			}, 1000*1)
+		}, 1000*1)
+	}
+window.photoboothClick	= photoboothClick
+	
+	var onWebcam	= true
+	if( location.hostname === '127.0.0.1' )	onWebcam	= false
+	if( onWebcam ){
+		// create the webcamTexture
+		var videoTexture	= new THREEx.WebcamTexture()
+		onRenderFcts.push(function(delta, now){
+			videoTexture.update(delta, now)
+		})		
+	}else{
+		// create the videoTexture
+		var videoUrl	= 'bower_components/threex.toxicpproc/examples/videos/sintel.ogv';
+		var videoTexture= new THREEx.VideoTexture(videoUrl)
+		videoTexture.video.volume	= 0
+		onRenderFcts.push(function(delta, now){
+			videoTexture.update(delta, now)
+		})		
+	}
+	
+	
+	
+	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
+					url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+pageUrl,
+					url	: pageUrl,
+					text	: 'Have Your Seen Yourself When you are drunk ? Now is the time!'
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+			
+		})
+	})
+	document.querySelector('#screenshotGooglePlus').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://plus.google.com/share?'+jQuery.param({
+					url	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+		})
+	})
+	document.querySelector('#screenshotFacebook').addEventListener('click', function(){
+		photoboothClick(function(){
+			uploadScreenshot(renderer, function(pageUrl){
+				var url	= 'https://www.facebook.com/sharer/sharer.php?'+jQuery.param({
+					u	: pageUrl,
+				})
+				window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
+			})
+		})
+	})
+	
+function uploadScreenshot(renderer, onSuccess){
+	// From http://29a.ch/2011/9/11/uploading-from-html5-canvas-to-imgur-data-uri
+	// able to upload your screenshot without running servers
+
+	var canvas	= renderer.domElement;
+	try {
+		var url = canvas.toDataURL('image/jpeg', 0.7);
+	} catch(e) { 
+		var url = canvas.toDataURL();
+	}
+
+	// upload to imgur using jquery/CORS
+	// https://developer.mozilla.org/En/HTTP_access_control
+	jQuery.ajax({
+		url	: 'http://api.imgur.com/2/upload.json',
+		type	: 'POST',
+		data	: {
+			type	: 'base64',
+			// get your key here, quick and fast http://imgur.com/register/api_anon
+			key	: 'a25f210e5e6f682fb052d63b19987a56',
+			name	: '.jpg',
+			title	: 'Have You Seen Yourself When You are Drunk ?',
+			caption	: 'Wanna Try ? http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
+			image	: url.split(',')[1]
+		},
+		dataType	: 'json'
+	}).success(function(data) {
+		console.log("result data", data)
+		var pageUrl	= data['upload']['links']['imgur_page'];
+		console.log('pageUrl', pageUrl)
+		onSuccess && onSuccess(pageUrl)
+	}).error(function() {
+		alert('Could not reach api.imgur.com. Sorry :(');
+	});
+}
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Create the screen THREE.Plane to receive video texture		//
+	//////////////////////////////////////////////////////////////////////////////////	
+
+	var geometry	= new THREE.PlaneGeometry( window.innerWidth, window.innerHeight )
+	var material	= new THREE.MeshBasicMaterial();
+	material.map	= videoTexture.texture
+	var mesh	= new THREE.Mesh(geometry, material)
+	scene.add(mesh)
+	
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		toxicPasses							//
+	//////////////////////////////////////////////////////////////////////////////////
+
+	var toxicPasses	= new THREEx.ToxicPproc.Passes('wasted')
+	onRenderFcts.push(function(delta, now){
+		toxicPasses.update(delta, now)
+	})
+	THREEx.addToxicPasses2DatGui(toxicPasses)
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		EffectComposer							//
+	//////////////////////////////////////////////////////////////////////////////////
+
+	var composer	= new THREE.EffectComposer(renderer);
+	var renderPass	= new THREE.RenderPass( scene, camera );
+	composer.addPass( renderPass );
+
+	// add toxicPasses to composer	
+	toxicPasses.addPassesTo(composer)
+
+	composer.passes[composer.passes.length -1 ].renderToScreen	= true;
+	
+
+	//////////////////////////////////////////////////////////////////////////////////
+	//		render the scene						//
+	//////////////////////////////////////////////////////////////////////////////////
+	onRenderFcts.push(function(delta, now){
+		// disable rendering directly thru renderer 
+		//renderer.render( scene, camera )
+		
+		// render thru composer
+		composer.render(delta)
+	})
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Rendering Loop runner						//
+	//////////////////////////////////////////////////////////////////////////////////
+	var lastTimeMsec= null
+	requestAnimationFrame(function animate(nowMsec){
+		// keep looping
+		requestAnimationFrame( animate );
+		// measure time
+		lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+		var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+		lastTimeMsec	= nowMsec
+		// call each update function
+		onRenderFcts.forEach(function(onRenderFct){
+			onRenderFct(deltaMsec/1000, nowMsec/1000)
+		})
+	})
+})
+</script>
+
+<!-- github ribbon -->
+<a href="https://github.com/jeromeetienne/demo.seenyourselfdrunk" target='_blank'><img style="position: absolute; top: 0; left: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_left_red_aa0000.png" alt="Fork me on GitHub"></a>
+
+</body>
