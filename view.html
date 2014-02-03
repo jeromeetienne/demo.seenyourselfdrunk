@@ -26,9 +26,13 @@
 .osd i.fa-4x {
 	margin-left: 25px
 }
+.osd i.fa-4x:hover {
+	pointer	: 'hand';
+	color	: white;
+}
 </style>
 <div class='osd'>
-	<a href='/' title='HomePage'><i class="fa fa-home fa-4x"></i></a>
+	<a href='.' title='HomePage'><i class="fa fa-home fa-4x"></i></a>
 	<a href='shoot.html' title='Take A Picture'><i class="fa fa-camera fa-4x"></i></a>
 	<i id='screenshotTwitter' class="fa fa-twitter fa-4x"></i>
 	<i id='screenshotGooglePlus' class="fa fa-google-plus fa-4x"></i>
@@ -52,29 +56,29 @@
 	var imgurId	= location.hash.substring(1)
 	console.log('imgurId', imgurId)
 	var pageUrl	= 'http://imgur.com/'+imgurId
-	var viewUrl	= '/view.html#'+imgurId
+	var viewUrl	= 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/view.html#'+imgurId
 	console.log('pageUrl', pageUrl)
 	var imageUrl	= 'http://i.imgur.com/'+imgurId+'.jpg'
 	
-	
+	document.querySelector('.screenshot img').src	= imageUrl
 	document.querySelector('#screenshotTwitter').addEventListener('click', function(){
 		var url	= 'https://twitter.com/intent/tweet?'+jQuery.param({
 			url	: 'http://jeromeetienne.github.io/demo.seenyourselfdrunk/',
 			text	: 'Have Your Seen Yourself When you are drunk ? Now is the time! '+imageUrl,
-			url	: imageUrl,
+			url	: pageUrl,
 			text	: 'Have Your Seen Yourself When you are drunk ? Now is the time!'
 		})
 		window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
 	})
 	document.querySelector('#screenshotGooglePlus').addEventListener('click', function(){
 		var url	= 'https://plus.google.com/share?'+jQuery.param({
-			url	: imageUrl,
+			url	: pageUrl,
 		})
 		window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
 	})
 	document.querySelector('#screenshotFacebook').addEventListener('click', function(){
 		var url	= 'https://www.facebook.com/sharer/sharer.php?'+jQuery.param({
-			u	: imageUrl,
+			u	: pageUrl,
 		})
 		window.open(url, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=600,width=600')
 	})
