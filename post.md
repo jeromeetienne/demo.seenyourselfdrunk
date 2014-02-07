@@ -12,14 +12,32 @@ do the why you did it
 
 where the inpiration cames from
 
+## Used Tools
+
 This demo is done with 2 threex extensions
 [threex.toxicpproc]()
-and 
-[threex.videotexture]().
+,
+[threex.videotexture]()
+and our lovely
+[three.js](http://threejs.org) obviously.
+[threex.videotexture]()
+is, according to [threex page](http://jeromeetienne.github.io/threex/#threex.videotexture) :
+
+> handles videos in texture. It is possible to put html5 video output in texture, even put the webcam in it, or to connect it to WebAudio API to get localized sounds.
+
+We will use it to read the webcam and display it full page.
+[threex.toxicpproc]()
+is, according to [threex page](http://jeromeetienne.github.io/threex/#threex.toxicpproc) :
+
+> an intoxicated post-processing effect. You can easily add it in your game to simulate the player is drunk. It provides various levels: sober, drunk, high and wasted.
+
+We will use it to deform the video from the webcam and makes you look drunk.
 
 ## Material and Webcam
 
-There is a video texture. Either you take this video from a url, like this.
+So the first thing is to get webcam on fullpage. 
+For that we use [threex.videotexture](). 
+It does video textures, either you take this video from a url, like this.
 
 ```
 // create the videoTexture
@@ -31,7 +49,7 @@ onRenderFcts.push(function(delta, now){
 })
 ```
 
-or you take the video live from the webcam, like this.
+Or you take the video live from the webcam, like this.
 
 ```
 // create the webcamTexture
@@ -42,9 +60,44 @@ onRenderFcts.push(function(delta, now){
 })	
 ```
 
+Then use ```videoTexture.texture``` in your materials to
+have the texture of the webcam. So let's see how we will
+compose our scene.
+
+
+## Scene Composition
+
+We need a Plane which take the full page, and we will apply our webcam texture to it. 
+So first there is an orthographic camera. Perspective is useless in this case, and make computations much more complex :)
+
+```
+var camera	= new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2,  window.innerHeight / 2, window.innerHeight / -2, -100, 100);
+```
+
+Then, there is a ```THREE.PlaneGeometry``` mesh
+using full screen for this camera.
+
+```
+var geometry	= new THREE.PlaneGeometry( window.innerWidth, window.innerHeight )
+var material	= new THREE.MeshBasicMaterial();
+var mesh	= new THREE.Mesh(geometry, material)
+scene.add(mesh)
+```
+
+Then we apply our ```videoTexture``` to this material. Thus 
+we see the webcam on this plan :)
+
+```
+material.map	= videoTexture.texture
+```
+
+So we got our face on full screen, cool for ego i guess :)
+Now let's apply some deformation to it!
+
 ## Post Processing and Rendering
 
-Instead of the usual rendering, where we render the scene directly on screen, like this
+Usually to render a scene, we use the following code.
+This is when we render the scene directly on screen.
 
 ```
 renderer.render( scene, camera )
@@ -114,24 +167,6 @@ But here we render thru the effect composer, so we do
 composer.render(delta)
 ```
 
-## Scene Composition
-
-there is a orthographic camera
-
-```
-var camera	= new THREE.OrthographicCamera(window.innerWidth / -2, window.innerWidth / 2,  window.innerHeight / 2, window.innerHeight / -2, -100, 100);
-```
-
-there is a ```THREE.PlaneGeometry```
-using full screen for this camera.
-
-```
-var geometry	= new THREE.PlaneGeometry( window.innerWidth, window.innerHeight )
-var material	= new THREE.MeshBasicMaterial();
-material.map	= videoTexture.texture
-var mesh	= new THREE.Mesh(geometry, material)
-scene.add(mesh)
-```
 
 
 
